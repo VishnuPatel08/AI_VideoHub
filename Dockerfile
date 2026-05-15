@@ -1,6 +1,15 @@
 # Builder stage
 FROM node:20-alpine AS builder
 
+# Declare build args
+ARG NEXT_PUBLIC_URL_ENDPOINT
+ARG NEXT_PUBLIC_PUBLIC_KEY
+
+# Make them available as env vars during build
+ENV NEXT_PUBLIC_URL_ENDPOINT=$NEXT_PUBLIC_URL_ENDPOINT
+ENV NEXT_PUBLIC_PUBLIC_KEY=$NEXT_PUBLIC_PUBLIC_KEY
+
+
 WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./

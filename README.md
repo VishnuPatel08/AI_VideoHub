@@ -40,8 +40,8 @@ npm install
 ```
 
 3. Configure environment variables:
-   - Copy `.env.example` to `.env`
-   - Fill in the required environment variables
+   - Copy `.env.local` from the project root (or create it)
+   - Fill in the required environment variables with your credentials
 
 4. Run the development server:
 ```bash
@@ -52,21 +52,29 @@ npm run dev
 
 ## Environment Variables
 
-Create a `.env` file with the following variables:
+Create a `.env.local` file in the project root with the following variables:
 
 ```env
 # Database
 MONGODB_URI=
 
 # Authentication
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=
+NEXTAUTH_SECRET=your-secret-key-here
+NEXTAUTH_URL=http://localhost:3000
 
-# ImageKit
-IMAGEKIT_PUBLIC_KEY=
+# ImageKit - Get these from your ImageKit dashboard
+NEXT_PUBLIC_PUBLIC_KEY=
+NEXT_PUBLIC_URL_ENDPOINT=
 IMAGEKIT_PRIVATE_KEY=
-IMAGEKIT_URL_ENDPOINT=
 ```
+
+### Required for Local Development:
+- `NEXT_PUBLIC_PUBLIC_KEY` - Your ImageKit public key
+- `NEXT_PUBLIC_URL_ENDPOINT` - Your ImageKit endpoint
+- `IMAGEKIT_PRIVATE_KEY` - Your ImageKit private key (for server-side operations)
+- `MONGODB_URI` - Your MongoDB connection string
+- `NEXTAUTH_SECRET` - Generate with: `openssl rand -base64 32`
+- `NEXTAUTH_URL` - Set to `http://localhost:3000` for development
 
 ## Available Scripts
 

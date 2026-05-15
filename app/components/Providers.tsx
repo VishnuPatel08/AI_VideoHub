@@ -15,20 +15,25 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     null
   );
   const [configError, setConfigError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadConfig = async () => {
       try {
         const res = await fetch("/api/imagekit-public", { cache: "no-store" });
         if (!res.ok) {
-          throw new Error("Failed to load ImageKit config");
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Failed to load ImageKit config");
         }
 
         const data = (await res.json()) as ImageKitConfig;
         setImageKitConfig(data);
       } catch (error) {
-        setConfigError("ImageKit configuration is unavailable");
-        console.error("ImageKit config error:", error);
+        const errorMsg = error instanceof Error ? error.message : "ImageKit configuration is unavailable";
+        setConfigError(errorMsg);
+        console.error("ImageKit config error:", errorMsg, "\n\nMake sure NEXT_PUBLIC_PUBLIC_KEY and NEXT_PUBLIC_URL_ENDPOINT are set in .env.local");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -46,7 +51,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (!imageKitConfig && !configError) {
+  // Show error message while loading
+  if (isLoading) {
     return (
       <SessionProvider refetchInterval={5 * 60}>
         <NotificationProvider>{children}</NotificationProvider>
@@ -57,6 +63,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider refetchInterval={5 * 60}>
       <NotificationProvider>
+        {configError && (
+          <div style={{ padding: "20px", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "4px", margin: "10px" }}>
+            <strong>⚠️ ImageKit Configuration Error:</strong>
+            <p>{configError}</p>
+            <p style={{ fontSize: "12px", marginTop: "10px" }}>
+              Check your .env.local file and set NEXT_PUBLIC_PUBLIC_KEY and NEXT_PUBLIC_URL_ENDPOINT. See README.md for details.
+            </p>
+          </div>
+        )}
         {imageKitConfig ? (
           <ImageKitProvider
             publicKey={imageKitConfig.publicKey}
