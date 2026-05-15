@@ -93,6 +93,25 @@ SMTP_PASS=
 - `npm run seed` - Seed the database
 - `npm run mailtrap` - Test email configuration
 
+## CI/CD
+
+This repository includes a GitHub Actions workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml) that runs on every push to `main`:
+
+1. Install dependencies
+2. Run lint
+3. Run the production build
+4. Build and push the Docker image to Docker Hub
+5. Trigger the Render deploy webhook
+
+Add these GitHub secrets before enabling the workflow:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_REPOSITORY`
+- `DOCKERHUB_TOKEN`
+- `RENDER_DEPLOY_HOOK_URL`
+
+The Docker image is pushed with the `latest` tag and the commit SHA tag, so Render can pull the newest release after the webhook fires.
+
 ## Project Structure
 
 ```
