@@ -6,11 +6,9 @@ A modern Next.js application for managing and selling video content using ImageK
 
 - 🔐 User Authentication (NextAuth.js)
 - 📹 Video Upload and Management (ImageKit)
-- 💳 Payment Processing (Razorpay)
 - 🎨 Modern UI with Tailwind CSS and DaisyUI
 - 📱 Fully Responsive Design
 - 🔒 Secure API Routes
-- 📧 Email Notifications (Nodemailer)
 - 🗄️ MongoDB Database Integration
 
 ## Tech Stack
@@ -20,8 +18,6 @@ A modern Next.js application for managing and selling video content using ImageK
 - **Authentication**: NextAuth.js, JWT
 - **Database**: MongoDB with Mongoose
 - **File Storage**: ImageKit
-- **Payment**: Razorpay
-- **Email**: Nodemailer
 - **Form Handling**: React Hook Form
 
 ## Prerequisites
@@ -29,8 +25,6 @@ A modern Next.js application for managing and selling video content using ImageK
 - Node.js (Latest LTS version)
 - MongoDB Database
 - ImageKit Account
-- Razorpay Account
-- SMTP Server (for email notifications)
 
 ## Getting Started
 
@@ -72,16 +66,6 @@ NEXTAUTH_URL=
 IMAGEKIT_PUBLIC_KEY=
 IMAGEKIT_PRIVATE_KEY=
 IMAGEKIT_URL_ENDPOINT=
-
-# Razorpay
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
-
-# Email (SMTP)
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
-SMTP_PASS=
 ```
 
 ## Available Scripts
@@ -95,7 +79,9 @@ SMTP_PASS=
 
 ## CI/CD
 
-This repository includes a GitHub Actions workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml) that runs on every push to `main`:
+This repository includes a GitHub Actions workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+
+Pipeline flow:
 
 1. Install dependencies
 2. Run lint
@@ -103,14 +89,74 @@ This repository includes a GitHub Actions workflow at [.github/workflows/deploy.
 4. Build and push the Docker image to Docker Hub
 5. Trigger the Render deploy webhook
 
-Add these GitHub secrets before enabling the workflow:
+### 1) GitHub Actions Trigger
+
+The workflow currently triggers on pushes to `main`.
+
+If your active branch is `master`, either:
+
+- Rename your default branch to `main`, or
+- Update [.github/workflows/deploy.yml](.github/workflows/deploy.yml) and change:
+
+```yaml
+on:
+   push:
+      branches:
+         - main
+```
+
+to:
+
+```yaml
+on:
+   push:
+      branches:
+         - master
+```
+
+### 2) Required GitHub Secrets
+
+Add these repository secrets in GitHub:
 
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_REPOSITORY`
 - `DOCKERHUB_TOKEN`
 - `RENDER_DEPLOY_HOOK_URL`
 
-The Docker image is pushed with the `latest` tag and the commit SHA tag, so Render can pull the newest release after the webhook fires.
+Where to add:
+
+GitHub Repository -> Settings -> Secrets and variables -> Actions -> New repository secret
+
+### 3) Docker Hub Setup
+
+1. Create a Docker Hub repository (for example: `image-kit-shop`).
+2. Use your Docker Hub username for `DOCKERHUB_USERNAME`.
+3. Use your Docker Hub repository name for `DOCKERHUB_REPOSITORY`.
+4. Create a Docker Hub Access Token and store it as `DOCKERHUB_TOKEN`.
+
+Image tags pushed by CI:
+
+- `latest`
+- `sha-<commit>`
+
+### 4) Render Setup
+
+1. In Render, create a Web Service using Docker image deployment.
+2. Set image path as:
+
+    `docker.io/<DOCKERHUB_USERNAME>/<DOCKERHUB_REPOSITORY>:latest`
+
+3. Copy the Render Deploy Hook URL and store it as `RENDER_DEPLOY_HOOK_URL` in GitHub Secrets.
+4. Add your runtime environment variables in Render (database, auth, imagekit).
+
+### 5) Deployment Result
+
+After you push code to the configured branch:
+
+1. GitHub Actions runs lint + build
+2. New Docker image is pushed to Docker Hub
+3. Render deploy hook is called
+4. Render pulls latest image and deploys your app
 
 ## Project Structure
 
