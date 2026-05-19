@@ -21,17 +21,42 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     const loadConfig = async () => {
       try {
         const res = await fetch("/api/imagekit-public", { cache: "no-store" });
+        
+        // Check response content type
+        const contentType = res.headers.get("content-type");
+        if (!contentType?.includes("application/json")) {
+          const text = await res.text();
+          console.error("ImageKit API returned non-JSON response:", {
+            status: res.status,
+            contentType,
+            text: text.substring(0, 200),
+          });
+          throw new Error(`ImageKit API error (${res.status}): Check server logs. Ensure env vars are set.`);
+        }
+        
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || "Failed to load ImageKit config");
+          throw new Error(data.error || `ImageKit API returned ${res.status}`);
         }
 
         const data = (await res.json()) as ImageKitConfig;
+        
+        // Validate data
+        if (!data.publicKey || !data.urlEndpoint) {
+          throw new Error("ImageKit config missing publicKey or urlEndpoint");
+        }
+        
         setImageKitConfig(data);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : "ImageKit configuration is unavailable";
         setConfigError(errorMsg);
-        console.error("ImageKit config error:", errorMsg, "\n\nMake sure NEXT_PUBLIC_PUBLIC_KEY and NEXT_PUBLIC_URL_ENDPOINT are set in .env.local");
+        console.error("ImageKit config error:", {
+          error: errorMsg,
+          envCheck: {
+            hasPublicKey: !!process.env.NEXT_PUBLIC_PUBLIC_KEY,
+            hasUrlEndpoint: !!process.env.NEXT_PUBLIC_URL_ENDPOINT,
+          }
+        });
       } finally {
         setIsLoading(false);
       }

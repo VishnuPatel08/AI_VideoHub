@@ -15,9 +15,11 @@ export async function connectToDatabase() {
 
   if (!cached.promise) {
     if (!MONGODB_URI) {
-      throw new Error(
-        "Please define the MONGODB_URI environment variable at runtime (use --env-file .env when running the container)"
+      const error = new Error(
+        "MONGODB_URI is not defined. Please add it to your .env.local file."
       );
+      console.error(error);
+      throw error;
     }
     const opts = {
       bufferCommands: true,
@@ -26,7 +28,14 @@ export async function connectToDatabase() {
 
     cached.promise = mongoose
       .connect(MONGODB_URI, opts)
-      .then(() => mongoose.connection);
+      .then(() => {
+        console.log("MongoDB connected successfully");
+        return mongoose.connection;
+      })
+      .catch((error) => {
+        console.error("MongoDB connection error:", error.message);
+        throw error;
+      });
   }
 
   try {

@@ -19,6 +19,14 @@ export default withAuth(
           return true;
         }
 
+        // Allow ImageKit configuration endpoints (public)
+        if (
+          pathname.startsWith("/api/imagekit-public") ||
+          pathname.startsWith("/api/imagekit-auth")
+        ) {
+          return true;
+        }
+
         // Public routes
         if (pathname === "/" || pathname.startsWith("/api/videos")) {
           return true;
