@@ -28,6 +28,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Declare build args for runtime use
+ARG NEXT_PUBLIC_URL_ENDPOINT
+ARG NEXT_PUBLIC_PUBLIC_KEY
+
 # Copy package files
 COPY package.json package-lock.json ./
 
@@ -41,6 +45,8 @@ COPY --from=builder /app/public ./public
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV NEXT_PUBLIC_URL_ENDPOINT=$NEXT_PUBLIC_URL_ENDPOINT
+ENV NEXT_PUBLIC_PUBLIC_KEY=$NEXT_PUBLIC_PUBLIC_KEY
 
 # Expose port
 EXPOSE 3000

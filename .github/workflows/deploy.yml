@@ -64,18 +64,6 @@ jobs:
             NEXT_PUBLIC_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_URL_ENDPOINT }}
             NEXT_PUBLIC_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PUBLIC_KEY }}
 
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Trigger Render deploy
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
